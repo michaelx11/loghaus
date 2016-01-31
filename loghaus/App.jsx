@@ -4,16 +4,17 @@ App = React.createClass({
 
   getMeteorData() {
     return {
-      logs: Logs.find({}).fetch()
+      logs: Logs.find({}, {sort: {createdAt: -1}}).fetch(),
+      currentUser: Meteor.user()
     }
   },
 
   getLangs() {
     return [
-      { name: "Javascript"},
-      { name: "Python"},
-      { name: "C"},
-      { name: "Java"}
+      { _id: 1, name: "Javascript"},
+      { _id: 2, name: "Python"},
+      { _id: 3, name: "C"},
+      { _id: 4, name: "Java"}
     ];
   },
 
@@ -25,20 +26,17 @@ App = React.createClass({
 
   renderLanguageOptions() {
     return this.getLangs().map((lang) => {
-      return <option value={lang.name}>{lang.name}</option>;
+      return <option key={lang._id} value={lang.name}>{lang.name}</option>;
     });
   }, 
 
   handleSubmit(event) {
     event.preventDefault();
  
-    // Find the text field via the React ref
-    var text = React.findDOMNode(this.refs.textInput).value.trim();
- 
-    Logs.insert({
-      count: text,
-      createdAt: new Date() // current time
-    });
+    var count = React.findDOMNode(this.refs.textInput).value.trim();
+    var language = React.findDOMNode(this.refs.languagePicker).value.trim();
+
+    Meteor.call("addLog", language, count);
  
     // Clear form
     React.findDOMNode(this.refs.textInput).value = "";
@@ -48,17 +46,23 @@ App = React.createClass({
     return (
       <div className="container">
         <header>
-          <h1>Your Logs:</h1>
+          <h1>Your Logs, total count: {this.data.totalCount}</h1>
+    
+          <AccountsUIWrapper />
 
-          <form className="new-log" onSubmit={this.handleSubmit}>
-            <input
-              type="text"
-              ref="textInput"
-              placeholder="Type to add a new log." />
-            <select ref="languagePicker">
-              {this.renderLanguageOptions()}
-            </select>
-          </form>
+          { this.data.currentUser ?
+            <form className="new-log" onSubmit={this.handleSubmit}>
+              <select ref="languagePicker">
+                {this.renderLanguageOptions()}
+              </select>
+              <input
+                type="text"
+                ref="textInput"
+                placeholder="Type to add a new log." />
+            </form>
+            : ''
+          }
+
         </header>
  
         <ul>

@@ -4,9 +4,17 @@ Log = React.createClass({
     // We can use propTypes to indicate it is required
     log: React.PropTypes.object.isRequired
   },
+  deleteThisLog() {
+    Meteor.call("removeLog", this.props.log._id);
+  }, 
   render() {
     return (
-      <li>{this.props.log.lang} - {this.props.log.count}</li>
+      <li>
+        <button className="delete" onClick={this.deleteThisLog}>
+                  &times;
+        </button>
+        <span className="text">{this.props.log.lang} - {this.props.log.count}</span>
+      </li>
     );
   }
 });
